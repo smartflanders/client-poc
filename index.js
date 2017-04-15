@@ -22,6 +22,8 @@ class Consumer {
     this.buildingBlocks = config.get('buildingBlocks');
     this.emitter = new EventEmitter();
 
+    this.interval = {from: "", to: ""};
+
     this.processTriple = this.processTriple.bind(this);
     this.emitter.on('gotTriple', this.processTriple);
 
@@ -56,6 +58,17 @@ class Consumer {
     }
   }
 
+  // From and to are timestamp strings, eg: "2017-04-15T15:45:00"
+  getInterval(from, to=this.momentToString(moment())) {
+    this.interval = {from: from, to: to};
+    this.performRequest("/parking?time=" + from);
+    this.performRequest("/parking?time=" + to);
+  }
+
+  momentToString(mom) {
+    return mom.format().substr(0,19);
+  }
+
   processorFinished(proc) {
     console.log("Processor finished");
   }
@@ -67,4 +80,4 @@ class Consumer {
 }
 
 let consumer = new Consumer();
-consumer.performRequest("/parking?page=2017-04-15T15:45:00.turtle");
+consumer.getInterval("2017-04-15T15:45:00");
