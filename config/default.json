@@ -1,7 +1,8 @@
 {
   "buildingBlocks": {
     "next": "http://www.w3.org/ns/hydra/core#next",
-    "previous": "http://www.w3.org/ns/hydra/core#previous"
+    "previous": "http://www.w3.org/ns/hydra/core#previous",
+    "numberOfVacantSpaces": "http://vocab.datex.org/terms#parkingNumberOfVacantSpaces"
   },
   "requestParams": {
     "family": 6,

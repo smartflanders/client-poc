@@ -1,51 +1,70 @@
 let N3 = require('n3');
 let http = require('follow-redirects').http;
-let stream = require('stream');
 let config = require('config');
 let moment = require('moment-timezone');
+let EventEmitter = require('events');
 
-class Consumer extends stream.Writable {
+function Processor(emitter) {
+  let writer = new require('stream').Writable({ objectMode: true });
+  writer.write = function (triple) {
+    emitter.emit('gotTriple', triple);
+  };
+  writer.on('unpipe', function() {
+    emitter.emit('processorFinished', this)
+  });
+  return writer;
+}
+
+class Consumer {
   constructor() {
-    super();
     this.triples = [];
-    this.streamParser = N3.StreamParser();
     this.requestParams = config.get('requestParams');
     this.buildingBlocks = config.get('buildingBlocks');
+    this.emitter = new EventEmitter();
+
+    this.processTriple = this.processTriple.bind(this);
+    this.emitter.on('gotTriple', this.processTriple);
+
+    this.processorFinished = this.processorFinished.bind(this);
+    this.emitter.on('processorFinished', this.processorFinished);
   }
 
   performRequest(path) {
-    let params = this.requestParams;
+    let params = Object.assign({}, this.requestParams);
     if (path !== undefined) {
         params.path = path;
     }
+    let _this = this;
     http.request(params, (res) => {
-        res.pipe(this.streamParser);
-        this.streamParser.pipe(this);
+      let streamParser = N3.StreamParser();
+      res.pipe(streamParser);
+      streamParser.pipe(new Processor(_this.emitter));
     }).end();
   }
 
-  write(triple) {
-    // TODO decide what happens with triple here (is it a prev/next link, is it a recording, ...)
-    // TODO how can we see if the stream is available? HTTP request queue? https://nodejs.org/api/events.html
+  processTriple(triple) {
     // What if this is slower than HTTP?? -> github issue
     if (triple.predicate === this.buildingBlocks.previous) {
-      this.parseTimestampFromLink(triple.object);
+      console.log(this.parseTimestampFromLink(triple.object));
     }
     if (triple.predicate === this.buildingBlocks.next) {
-      this.parseTimestampFromLink(triple.object);
+      console.log(this.parseTimestampFromLink(triple.object));
     }
-    this.triples.push(triple);
+    if (triple.predicate === this.buildingBlocks.numberOfVacantSpaces) {
+      this.triples.push(triple);
+      console.log(triple);
+    }
+  }
+
+  processorFinished(proc) {
+    console.log("Processor finished");
   }
 
   parseTimestampFromLink(link) {
     let len = link.length;
     return moment(link.substring(len-26, len-7));
   }
-
-  logTriples() {
-    console.log(this.triples);
-  }
 }
 
 let consumer = new Consumer();
-consumer.performRequest();
+consumer.performRequest("/parking?page=2017-04-15T15:45:00.turtle");
