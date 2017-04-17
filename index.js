@@ -9,7 +9,7 @@ function Processor(emitter, id) {
   writer.write = function (triple) {
     emitter.emit('gotTriple', triple);
   };
-  writer.on('unpipe', function() {
+  writer.on('finish', function() {
     emitter.emit('processorFinished', id)
   });
   return writer;
@@ -47,14 +47,16 @@ class Consumer {
         res.pipe(streamParser);
         streamParser.pipe(proc);
       }).end();
+    } else {
+      console.log("Already fetched " + path + ", aborting.");
     }
   }
 
   processTriple(triple) {
     // TODO What if this is slower than HTTP?? -> github issue
-    if (triple.predicate === this.buildingBlocks.previous) {
+    if (triple.predicate === this.buildingBlocks.previous || triple.predicate === this.buildingBlocks.next) {
       let ts = Consumer.parseTimestampFromLink(triple.object);
-      if (Consumer.intervalContains(this.interval, ts) || triple.predicate === this.buildingBlocks.next) {
+      if (Consumer.intervalContains(this.interval, ts)) {
         console.log(ts + " is included in interval, performing request.");
         this.performRequest("/parking?time=" + ts);
       } else {
@@ -69,9 +71,7 @@ class Consumer {
   // From and to are timestamp strings, eg: "2017-04-15T15:45:00"
   getInterval(from, to=Consumer.momentToString(moment())) {
     this.interval = {from: from, to: to};
-    // TODO to timestamp should not be included, but first fix next links in server code (next = file itself)
     this.performRequest("/parking?time=" + from);
-    this.performRequest("/parking?time=" + to);
   }
 
   processorFinished(id) {
@@ -85,6 +85,11 @@ class Consumer {
     }
     if (allFinished) {
       console.log("All processors finished");
+      this.triples.sort((a,b) => {
+        let aTime = moment(a.graph.substring(a.graph.length - 19));
+        let bTime = moment(b.graph.substring(b.graph.length - 19));
+        return aTime-bTime;
+      });
       this.logTriples();
     }
   }
@@ -104,6 +109,8 @@ class Consumer {
 
   static intervalContains(interval, timestamp) {
     let interval_moment = {from: moment(interval.from), to: moment(interval.to)};
+    console.log(interval.from);
+    console.log(interval_moment.from);
     let timestamp_moment = moment(timestamp);
     return interval_moment.from <= timestamp_moment && timestamp_moment <= interval_moment.to;
   }
