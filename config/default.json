@@ -1,9 +1,4 @@
 {
-  "buildingBlocks": {
-    "next": "http://www.w3.org/ns/hydra/core#next",
-    "previous": "http://www.w3.org/ns/hydra/core#previous",
-    "numberOfVacantSpaces": "http://vocab.datex.org/terms#parkingNumberOfVacantSpaces"
-  },
   "requestParams": {
     "family": 6,
     "port": 3000,

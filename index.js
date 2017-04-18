@@ -19,7 +19,11 @@ class Consumer {
   constructor() {
     this.triples = [];
     this.requestParams = config.get('requestParams');
-    this.buildingBlocks = config.get('buildingBlocks');
+    this.buildingBlocks = {
+        "next": "http://www.w3.org/ns/hydra/core#next",
+        "previous": "http://www.w3.org/ns/hydra/core#previous",
+        "numberOfVacantSpaces": "http://vocab.datex.org/terms#parkingNumberOfVacantSpaces"
+    };
     this.emitter = new EventEmitter();
 
     this.interval = {from: "", to: ""};
@@ -58,7 +62,7 @@ class Consumer {
       let ts = Consumer.parseTimestampFromLink(triple.object);
       if (Consumer.intervalContains(this.interval, ts)) {
         console.log(ts + " is included in interval, performing request.");
-        this.performRequest("/parking?time=" + ts);
+        this.performRequest(triple.object);
       } else {
         console.log(ts + " was not contained in interval.");
       }
@@ -112,7 +116,7 @@ class Consumer {
     console.log(interval.from);
     console.log(interval_moment.from);
     let timestamp_moment = moment(timestamp);
-    return interval_moment.from <= timestamp_moment && timestamp_moment <= interval_moment.to;
+    return interval_moment.from <= timestamp_moment && timestamp_moment < interval_moment.to;
   }
 
   static momentToString(mom) {
