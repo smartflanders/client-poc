@@ -6,18 +6,37 @@ class App extends Component {
   constructor() {
     super();
 
-    // This is code from the old index.js illustrating consumer usage
-    /*let consumer = new Consumer({parallel: false});
+    this.state = {
+      triples: []
+    };
+
+    let consumer = new Consumer({parallel: false});
+    let _this = this;
     consumer.on('data', function(triple) {
-      console.log("Index received " + triple);
+      //console.log(triple.graph + "\t" + triple.subject + "\t" + triple.object);
+      let state = _this.state;
+      state.triples.push(triple);
+      _this.setState(state);
     });
-    consumer.getInterval("2017-04-16T15:50:00", "2017-04-16T16:10:00");*/
+    consumer.getInterval("2017-04-24T23:30:00");
   }
 
   render() {
     return (
       <div className="App">
-        <p>HELLO WORLD</p>
+        <h1>APP</h1>
+        <table>
+          <tr><th>subject</th><th>predicate</th><th>object</th></tr>
+          {this.state.triples.map((el, i) => {
+            return (
+              <tr key={i}>
+                <td>{el.subject}</td>
+                <td>{el.predicate}</td>
+                <td>{el.object}</td>
+              </tr>
+            )
+          })}
+        </table>
       </div>
     );
   }

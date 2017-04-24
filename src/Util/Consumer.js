@@ -4,11 +4,11 @@ let moment = require('moment-timezone');
 let EventEmitter = require('events');
 let Stream = require('stream');*/
 
-import N3 from 'n3';
+let N3 = require('n3');
 let http = require('follow-redirects').http;
-import moment from 'moment-timezone';
-import EventEmitter from 'events';
-import Stream from 'stream';
+let moment = require('moment-timezone');
+let EventEmitter = require('events');
+let Stream = require('stream');
 
 // TODO refactor this: IntervalConsumer should be a subclass of Consumer
 
@@ -25,13 +25,12 @@ function Processor(emitter, id) {
 
 class Consumer extends Stream.Readable {
   constructor(conf = {parallel: true}) {
-    super();
+    super({objectMode: true});
     this.triples = [];
     this.conf = conf;
+    this.baseUrl = "https://linked.open.gent/parking/"
     this.requestParams = {
-        "family": 6,
-        "port": 3000,
-        "path": "/parking"
+        "path": this.baseUrl
     };
     this.buildingBlocks = {
       "next": "http://www.w3.org/ns/hydra/core#next",
@@ -86,9 +85,10 @@ class Consumer extends Stream.Readable {
         }
       }
     }
-    if (triple.predicate === this.buildingBlocks.numberOfVacantSpaces) {
+    //if (triple.predicate === this.buildingBlocks.numberOfVacantSpaces) {
       this.triples.push(triple);
-    }
+      this._read();
+    //}
   }
 
   performRequestFromQueue() {
@@ -99,7 +99,7 @@ class Consumer extends Stream.Readable {
   // From and to are timestamp strings, eg: "2017-04-15T15:45:00"
   getInterval(from, to=Consumer.momentToString(moment())) {
     this.interval = {from: from, to: to};
-    this.performRequest("http://localhost:3000/parking?time=" + from);
+    this.performRequest(this.baseUrl + "?time=" + from);
   }
 
   processorFinished(id) {
@@ -128,15 +128,18 @@ class Consumer extends Stream.Readable {
     return proc;
   }
 
-  read() {
-    // TODO implement as readable stream
+  _read() {
+    let triple = this.triples.pop();
+    if (triple !== undefined) {
+      this.push(triple)
+    }
   }
 
-  logTriples() {
+  /*logTriples() {
     this.triples.forEach((triple) => {
       console.log(triple.graph + "\t" + triple.subject + "\t" + triple.object);
     })
-  }
+  }*/
 
   static intervalContains(interval, timestamp) {
     let interval_moment = {from: moment(interval.from), to: moment(interval.to)};
@@ -150,7 +153,7 @@ class Consumer extends Stream.Readable {
 
   static parseTimestampFromLink(link) {
     let len = link.length;
-    return link.substring(len-26, len-7);
+    return link.substring(len-19);
   }
 }
 
