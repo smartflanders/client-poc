@@ -147,6 +147,7 @@ class Consumer extends Stream.Readable {
     return interval_moment.from <= timestamp_moment && timestamp_moment < interval_moment.to;
   }
 
+  // TODO use normal moment, makes this obsolete
   static momentToString(mom) {
     return mom.format().substr(0,19);
   }

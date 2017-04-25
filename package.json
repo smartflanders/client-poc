@@ -3,14 +3,15 @@
   "version": "0.1.0",
   "description": "Client for ghent-datex2-to-linkeddata",
   "dependencies": {
-    "react": "^15.5.4",
-    "react-dom": "^15.5.4",
     "babel": "^6.23.0",
     "babel-cli": "^6.24.1",
     "config": "^1.25.1",
     "follow-redirects": "^1.2.3",
+    "moment": "^2.18.1",
     "moment-timezone": "^0.5.13",
-    "n3": "^0.9.1"
+    "n3": "^0.9.1",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4"
   },
   "devDependencies": {
     "react-scripts": "0.9.5"
