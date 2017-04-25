@@ -70,10 +70,10 @@ class App extends Component {
 
   calculateClassIntervalBorders() {
     let deltas = [];
-    deltas.sort();
     Object.keys(this.state.parkings).forEach((key) => {
       deltas.push(this.state.parkings[key].delta);
     });
+    deltas.sort((a,b) => a-b);
     let diff = deltas[deltas.length-1] - deltas[0];
     let intervalLength = Math.round(diff/3);
     return [deltas[0] + intervalLength, deltas[0] + 2*intervalLength]
