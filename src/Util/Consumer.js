@@ -28,7 +28,7 @@ class Consumer extends Stream.Readable {
     super({objectMode: true});
     this.triples = [];
     this.conf = conf;
-    this.baseUrl = "https://linked.open.gent/parking/"
+    this.baseUrl = "https://linked.open.gent/parking/";
     this.requestParams = {
         "path": this.baseUrl
     };
