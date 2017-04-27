@@ -98,7 +98,7 @@ class App extends Component {
                       <td>{parking.description}</td>
                       <td>{last}</td>
                       <td>{parking.totalSpaces ? parking.totalSpaces : '...'}</td>
-                      <td>{!isNaN(percentage) ? percentage : '...'}</td>
+                      <td>{!isNaN(percentage) ? percentage + '%' : '...'}</td>
                       <td>
                         <Sparklines data={data} limit={data.length}>
                           <SparklinesLine color="#253e56"/>
