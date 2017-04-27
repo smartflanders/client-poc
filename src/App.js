@@ -35,7 +35,7 @@ class App extends Component {
       _this.processTriple(triple);
     });
     let from = moment().subtract(15, 'minutes').format('YYYY-MM-DDTHH:mm:ss');
-    consumer.getInterval(from);
+    consumer.getAllFrom(from);
   }
 
   processTriple(triple) {
