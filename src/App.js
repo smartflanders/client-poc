@@ -82,13 +82,15 @@ class App extends Component {
                     });
                     let last = parking.recordings[keys[keys.length-1]];
                     let percentage = ((last / parking.totalSpaces) * 100).toPrecision(2);
+                    let change = data[data.length-1]-data[0];
                     return (<tr key={i}>
                       <td>{parking.description}</td>
                       <td>{last + '/' + parking.totalSpaces + ' (' + percentage + '%)'}</td>
                       <td>
-                        <Sparklines data={data} limit={data.length} svgHeight={10} svgWidth={100}>
+                        <Sparklines data={data} limit={data.length} svgHeight={10} svgWidth={100} style={{marginRight: '10px'}}>
                           <SparklinesLine color="#253e56"/>
                         </Sparklines>
+                        {change <= 0 ? change : '+' + change}
                       </td>
                     </tr>);
                   })}
