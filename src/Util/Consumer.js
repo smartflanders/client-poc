@@ -66,10 +66,23 @@ class Consumer extends Stream.Readable {
         params.path = path;
       }
       let proc = this.addProcessor();
+      let _this = this;
       http.request(params, (res) => {
         let streamParser = N3.StreamParser();
         res.pipe(streamParser);
         streamParser.pipe(proc);
+        console.log(res);
+        if (res.headers["cache-control"]) {
+          let header = res.headers["cache-control"];
+          let regex = /max-age=(.*)/g;
+          let seconds = regex.exec(header)[1] * 1000;
+          console.log(seconds);
+          setTimeout(() => {
+            _this.aggregatedLinks.splice(this.aggregatedLinks.indexOf(path), 1);
+            console.log("Refreshing!");
+            _this.performRequest(path);
+          }, seconds);
+        }
       }).end();
     }
   }
@@ -85,10 +98,8 @@ class Consumer extends Stream.Readable {
         }
       }
     }
-    //if (triple.predicate === this.buildingBlocks.numberOfVacantSpaces) {
-      this.triples.push(triple);
-      this._read();
-    //}
+    this.triples.push(triple);
+    this._read();
   }
 
   performRequestFromQueue() {
@@ -102,6 +113,12 @@ class Consumer extends Stream.Readable {
     this.performRequest(this.baseUrl + "?time=" + from);
   }
 
+  // TODO this is ugly code. Should be another subclass of Consumer.
+  getAllFrom(from) {
+    this.interval = {from: from, to: false};
+    this.performRequest(this.baseUrl + "?time=" + from);
+  }
+
   processorFinished(id) {
     this.finishedProcessors[id] = true;
     if (!this.conf.parallel) this.emitter.emit('readyForRequest');
@@ -110,14 +127,6 @@ class Consumer extends Stream.Readable {
       if (this.finishedProcessors.hasOwnProperty(proc_id) && !this.finishedProcessors[proc_id]) {
         allFinished = false;
       }
-    }
-    if (allFinished) {
-      /*this.triples.sort((a,b) => {
-        let aTime = moment(a.graph.substring(a.graph.length - 19));
-        let bTime = moment(b.graph.substring(b.graph.length - 19));
-        return aTime-bTime;
-      });
-      this.logTriples();*/
     }
   }
 
@@ -135,16 +144,16 @@ class Consumer extends Stream.Readable {
     }
   }
 
-  /*logTriples() {
-    this.triples.forEach((triple) => {
-      console.log(triple.graph + "\t" + triple.subject + "\t" + triple.object);
-    })
-  }*/
-
   static intervalContains(interval, timestamp) {
-    let interval_moment = {from: moment(interval.from), to: moment(interval.to)};
-    let timestamp_moment = moment(timestamp);
-    return interval_moment.from <= timestamp_moment && timestamp_moment < interval_moment.to;
+    if (interval.to) {
+      let interval_moment = {from: moment(interval.from), to: moment(interval.to)};
+      let timestamp_moment = moment(timestamp);
+      return interval_moment.from <= timestamp_moment && timestamp_moment < interval_moment.to;
+    } else {
+      let from_moment = moment(interval.from);
+      let timestamp_moment = moment(timestamp);
+      return from_moment <= timestamp_moment;
+    }
   }
 
   // TODO use normal moment, makes this obsolete
