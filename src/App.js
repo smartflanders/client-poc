@@ -46,7 +46,7 @@ class App extends Component {
         this.setState({parkings: Object.assign(this.state.parkings, {[triple.subject]: parking})});
       }
       if (triple.predicate === this.buildingBlocks.predicates.vacantSpaces) {
-        parking.recordings[moment(triple.graph.substr(triple.graph.length - this.momentStringLength))] = parseInt(this.extractLiteral(triple.object), 10);
+        parking.recordings[triple.graph.substr(triple.graph.length - this.momentStringLength)] = parseInt(this.extractLiteral(triple.object), 10);
         this.setState({parkings: Object.assign(this.state.parkings, {[triple.subject]: parking})});
       }
       if (triple.predicate === this.buildingBlocks.predicates.totalSpaces) {
@@ -64,29 +64,29 @@ class App extends Component {
         <div className="page-header">
           <h1>SmartFlanders <small>Proof of concept</small></h1>
         </div>
-        <div className="col-md-10 col-md-offset-1">
-          <div className="panel panel-default panel-primary">
+        <div>
+          <div style={{display: 'inline-block', position: 'absolute', marginLeft: '20px'}} className="panel panel-default panel-primary">
             <div className="panel-heading">Recente trends</div>
             <div className="panel-body">
               <table className="table">
                 <tbody>
-                  <tr><th>Parking</th><th>Vrije plaatsen</th><th>Trend</th></tr>
+                  <tr><th>Parking</th><th>Vrije plaatsen</th><th>Trend 15 min</th></tr>
                   {Object.keys(this.state.parkings).map((el, i) => {
                     let parking = this.state.parkings[el];
-                    let sortedKeys = Object.keys(parking.recordings).sort((a, b) => {
-                      return a - b;
-                    });
+                    let keys = Object.keys(parking.recordings);
                     let data = [];
-                    sortedKeys.forEach((key) => {
-                      data.push(parking.recordings[key]);
+                    keys.forEach((key) => {
+                      if (moment().subtract(15, 'minutes').isBefore(moment(key))) {
+                        data.push(parking.recordings[key]);
+                      }
                     });
-                    let last = parking.recordings[sortedKeys[sortedKeys.length-1]];
+                    let last = parking.recordings[keys[keys.length-1]];
                     let percentage = ((last / parking.totalSpaces) * 100).toPrecision(2);
                     return (<tr key={i}>
                       <td>{parking.description}</td>
                       <td>{last + '/' + parking.totalSpaces + ' (' + percentage + '%)'}</td>
                       <td>
-                        <Sparklines data={data} limit={data.length}>
+                        <Sparklines data={data} limit={data.length} svgHeight={10} svgWidth={100}>
                           <SparklinesLine color="#253e56"/>
                         </Sparklines>
                       </td>
