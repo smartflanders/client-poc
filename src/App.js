@@ -82,7 +82,7 @@ class App extends Component {
             <div className="panel-body">
               <table className="table">
                 <tbody>
-                  <tr><th>Parking</th><th>Vrije plaatsen</th><th>Totaal</th><th>Procentueel</th><th>Trend</th></tr>
+                  <tr><th>Parking</th><th>Vrije plaatsen</th><th>Trend</th></tr>
                   {Object.keys(this.state.parkings).map((el, i) => {
                     let parking = this.state.parkings[el];
                     let sortedKeys = Object.keys(parking.recordings).sort((a, b) => {
@@ -96,9 +96,7 @@ class App extends Component {
                     let percentage = ((last / parking.totalSpaces) * 100).toPrecision(2);
                     return (<tr key={i}>
                       <td>{parking.description}</td>
-                      <td>{last}</td>
-                      <td>{parking.totalSpaces ? parking.totalSpaces : '...'}</td>
-                      <td>{!isNaN(percentage) ? percentage + '%' : '...'}</td>
+                      <td>{last + '/' + parking.totalSpaces + ' (' + percentage + '%)'}</td>
                       <td>
                         <Sparklines data={data} limit={data.length}>
                           <SparklinesLine color="#253e56"/>
