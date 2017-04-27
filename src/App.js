@@ -93,7 +93,7 @@ class App extends Component {
                       data.push(parking.recordings[key]);
                     });
                     let last = parking.recordings[sortedKeys[sortedKeys.length-1]];
-                    let percentage = ((last / parking.totalSpaces) * 100).toPrecision(4);
+                    let percentage = ((last / parking.totalSpaces) * 100).toPrecision(2);
                     return (<tr key={i}>
                       <td>{parking.description}</td>
                       <td>{last}</td>
