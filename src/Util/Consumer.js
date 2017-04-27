@@ -71,15 +71,12 @@ class Consumer extends Stream.Readable {
         let streamParser = N3.StreamParser();
         res.pipe(streamParser);
         streamParser.pipe(proc);
-        console.log(res);
         if (res.headers["cache-control"]) {
           let header = res.headers["cache-control"];
           let regex = /max-age=(.*)/g;
           let seconds = regex.exec(header)[1] * 1000;
-          console.log(seconds);
           setTimeout(() => {
             _this.aggregatedLinks.splice(this.aggregatedLinks.indexOf(path), 1);
-            console.log("Refreshing!");
             _this.performRequest(path);
           }, seconds);
         }
