@@ -30,7 +30,10 @@ class Consumer extends Stream.Readable {
     this.conf = conf;
     this.baseUrl = "https://linked.open.gent/parking/";
     this.requestParams = {
-        "path": this.baseUrl
+        "path": this.baseUrl,
+        "headers": {
+          "Accept": "application/trig"
+        }
     };
     this.buildingBlocks = {
       "next": "http://www.w3.org/ns/hydra/core#next",
@@ -59,14 +62,17 @@ class Consumer extends Stream.Readable {
   }
 
   performRequest(path) {
+    console.log('Performing request')
     if (this.aggregatedLinks.indexOf(path) === -1) {
       this.aggregatedLinks.push(path);
       let params = Object.assign({}, this.requestParams);
+      console.log('getting path')
       if (path !== undefined) {
         params.path = path;
       }
       let proc = this.addProcessor();
       let _this = this;
+      console.log(params);
       http.request(params, (res) => {
         let streamParser = N3.StreamParser();
         res.pipe(streamParser);
