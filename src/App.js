@@ -61,9 +61,6 @@ class App extends Component {
 
   render() {
       return (<div className="App">
-        <div className="page-header">
-          <h1>SmartFlanders <small>Proof of concept</small></h1>
-        </div>
         <div>
           <div style={{display: 'inline-block', position: 'absolute', marginLeft: '20px'}} className="panel panel-default panel-primary">
             <div className="panel-heading">Recente trends</div>

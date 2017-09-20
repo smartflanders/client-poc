@@ -12,7 +12,8 @@
     "n3": "^0.9.1",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
-    "react-sparklines": "^1.6.0"
+    "react-sparklines": "^1.6.0",
+    "smartflanders-data-query": "^1.0.0"
   },
   "devDependencies": {
     "react-scripts": "0.9.5"

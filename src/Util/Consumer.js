@@ -62,17 +62,14 @@ class Consumer extends Stream.Readable {
   }
 
   performRequest(path) {
-    console.log('Performing request')
     if (this.aggregatedLinks.indexOf(path) === -1) {
       this.aggregatedLinks.push(path);
       let params = Object.assign({}, this.requestParams);
-      console.log('getting path')
       if (path !== undefined) {
         params.path = path;
       }
       let proc = this.addProcessor();
       let _this = this;
-      console.log(params);
       http.request(params, (res) => {
         let streamParser = N3.StreamParser();
         res.pipe(streamParser);
